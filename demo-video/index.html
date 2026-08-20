@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Manrope";
+        src: url("assets/fonts/manrope-cyrillic.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+        unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+      }
+      @font-face {
+        font-family: "Manrope";
+        src: url("assets/fonts/manrope-latin.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 200 800;
+        font-display: swap;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #ecece8; color: #151514; }
+      body { font-family: "Manrope", sans-serif; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #ecece8; }
+      .scene { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; background-color: #ecece8; }
+      .scene:not(#scene-intro) { opacity: 0; }
+      .stage-grid {
+        position: absolute; inset: 0; opacity: .42;
+        background-image: linear-gradient(rgba(21,21,20,.055) 1px, rgba(236,236,232,0) 1px), linear-gradient(90deg, rgba(21,21,20,.055) 1px, rgba(236,236,232,0) 1px);
+        background-size: 80px 80px;
+      }
+      .stage-rule { position: absolute; left: 88px; right: 88px; height: 1px; background: rgba(21,21,20,.16); }
+      .stage-rule.top { top: 76px; }
+      .stage-rule.bottom { bottom: 70px; }
+      .meta { position: absolute; top: 38px; left: 90px; display: flex; gap: 18px; align-items: center; font-size: 18px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      .meta span { color: #63635f; font-weight: 650; }
+      .counter { position: absolute; right: 90px; top: 39px; font-size: 18px; font-weight: 700; color: #63635f; font-variant-numeric: tabular-nums; }
+      .orb { position: absolute; width: 430px; height: 430px; border-radius: 50%; filter: blur(2px); opacity: .45; }
+      .orb.blue { background: radial-gradient(circle, rgba(31,100,200,.22) 0%, rgba(31,100,200,0) 70%); }
+      .orb.orange { background: radial-gradient(circle, rgba(252,80,0,.22) 0%, rgba(252,80,0,0) 70%); }
+      .orb.gold { background: radial-gradient(circle, rgba(252,191,2,.26) 0%, rgba(252,191,2,0) 70%); }
+
+      .intro-copy { position: absolute; left: 112px; top: 188px; width: 1080px; }
+      .intro-kicker { font-size: 22px; line-height: 1; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; color: #60605d; }
+      .intro-title { margin-top: 34px; font-size: 108px; line-height: .98; letter-spacing: -.055em; font-weight: 800; max-width: 1180px; }
+      .intro-subtitle { margin-top: 38px; font-size: 28px; line-height: 1.45; color: #555552; max-width: 880px; }
+      .theme-stack { position: absolute; right: 110px; bottom: 140px; display: grid; gap: 14px; width: 480px; }
+      .theme-pill { display: flex; align-items: center; gap: 18px; height: 88px; border: 1px solid rgba(21,21,20,.14); border-radius: 24px; background: rgba(255,255,255,.65); padding: 0 26px; font-size: 25px; font-weight: 750; }
+      .theme-pill i { width: 18px; height: 18px; border-radius: 50%; }
+      .theme-pill small { margin-left: auto; font-size: 18px; color: #60605d; font-weight: 650; }
+
+      .demo-layout { position: absolute; inset: 98px 94px 82px; display: grid; grid-template-columns: 1fr 570px 1fr; align-items: center; gap: 72px; }
+      .side-copy { align-self: center; }
+      .side-copy.right { text-align: right; }
+      .theme-number { font-size: 20px; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; color: #60605d; }
+      .theme-name { margin-top: 20px; font-size: 86px; line-height: .92; letter-spacing: -.045em; font-weight: 800; }
+      .theme-description { margin-top: 26px; font-size: 24px; line-height: 1.48; color: #565653; max-width: 490px; }
+      .side-copy.right .theme-description { margin-left: auto; }
+      .function-card { margin-top: 46px; display: inline-flex; align-items: center; gap: 16px; border: 1px solid rgba(21,21,20,.13); border-radius: 999px; background: rgba(255,255,255,.64); padding: 16px 22px; font-size: 20px; font-weight: 700; }
+      .function-card b { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #151514; color: #fff; font-size: 17px; }
+
+      .phone { position: relative; width: 570px; height: 890px; border: 1px solid rgba(20,20,20,.16); border-radius: 58px; overflow: hidden; box-shadow: 0 34px 86px rgba(20,20,20,.16), 0 3px 12px rgba(20,20,20,.06); }
+      .phone.jeton { --bg:#fdfaf6; --surface:#fff; --soft:#eef4ff; --text:#17243a; --muted:#66748a; --border:#e1e7f0; --primary:#1f64c8; --primaryFg:#fff; font-family:"Manrope",sans-serif; background:#fdfaf6; color:#17243a; }
+      .phone.caldera { --bg:#f4f1eb; --surface:#fffdf8; --soft:#fffdf8; --text:#070607; --muted:#64635f; --border:#c8c7c1; --primary:#fc5000; --primaryFg:#fff; font-family:"Oswald",sans-serif; background:#f4f1eb; color:#070607; }
+      .phone.contractbook { --bg:#fbfaf5; --surface:#fff; --soft:#f4f3ed; --text:#1a1a1a; --muted:#6d6868; --border:#e0ded7; --primary:#0541f5; --primaryFg:#fff; font-family:"Inter",sans-serif; background:#fbfaf5; color:#1a1a1a; }
+      .phone-status { height: 52px; padding: 22px 28px 0; display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; }
+      .status-icons { letter-spacing: .08em; font-size: 14px; }
+      .phone-body { padding: 34px 34px 28px; }
+      .app-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+      .eyebrow { font-size: 17px; line-height: 1; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; color: var(--primary); }
+      .head-row { margin-top: 20px; display: flex; align-items: center; gap: 18px; }
+      .back { width: 28px; font-size: 34px; line-height: 1; font-family: sans-serif; font-weight: 300; }
+      .app-title { font-size: 44px; line-height: 1.02; letter-spacing: -.045em; font-weight: 780; }
+      .sparkle { display: grid; place-items: center; width: 54px; height: 54px; flex: none; border-radius: 18px; background: var(--soft); color: var(--primary); font-size: 28px; }
+      .app-copy { margin-top: 28px; font-size: 21px; line-height: 1.48; color: var(--muted); }
+      .progress { margin-top: 30px; height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--border) 74%, transparent); overflow: hidden; }
+      .progress-fill { width: 25%; height: 100%; border-radius: inherit; background: var(--primary); transform-origin: left center; }
+      .question { margin-top: 34px; border-radius: 26px; background: var(--soft); padding: 30px; }
+      .question-title { font-size: 26px; line-height: 1.18; font-weight: 850; max-width: 430px; }
+      .options { margin-top: 26px; display: grid; gap: 14px; }
+      .option { height: 70px; display: flex; align-items: center; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); color: var(--text); padding: 0 22px; font-size: 20px; font-weight: 550; }
+      .option.selected { border-color: var(--primary); background: var(--primary); color: var(--primaryFg); }
+      .skip { margin-top: 30px; font-size: 18px; color: var(--muted); }
+      .cta { position: absolute; left: 30px; right: 30px; bottom: 34px; height: 70px; border-radius: 16px; background: var(--primary); color: var(--primaryFg); display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 21px; font-weight: 850; }
+      .home-indicator { position: absolute; width: 164px; height: 6px; border-radius: 99px; left: 203px; bottom: 14px; background: var(--text); opacity: .82; }
+
+      .phone.caldera .eyebrow { color: #070607; }
+      .phone.caldera .phone-body { padding-top: 28px; }
+      .phone.caldera .app-title { font-size: 57px; line-height: .9; text-transform: uppercase; letter-spacing: .01em; font-weight: 600; }
+      .phone.caldera .sparkle { background: transparent; color: #070607; }
+      .phone.caldera .app-copy { margin-top: 22px; }
+      .phone.caldera .progress { margin-top: 22px; }
+      .phone.caldera .question { margin-top: 28px; padding: 26px; background: #fffdf8; border: 1px solid #c8c7c1; border-radius: 20px; }
+      .phone.caldera .question-title { text-transform: none; font-family: "Manrope",sans-serif; }
+      .phone.caldera .options { margin-top: 22px; gap: 12px; }
+      .phone.caldera .option { height: 64px; border-radius: 14px; font-family:"Manrope",sans-serif; }
+      .phone.caldera .option.selected { background:#fffdf8; color:#c93f00; border:2px solid #fc5000; }
+      .phone.caldera .skip { margin-top: 22px; }
+      .phone.caldera .cta { border-radius: 14px; color:#151514; text-transform: none; font-family:"Manrope",sans-serif; }
+
+      .phone.contractbook .question { background: #f4f3ed; border-radius: 24px; }
+      .phone.contractbook .options { display: flex; flex-wrap: wrap; gap: 12px; }
+      .phone.contractbook .option { width: auto; height: 62px; border-radius: 999px; padding: 0 24px; }
+      .phone.contractbook .option.selected { background:#0541f5; color:#fff; border-color:#0541f5; }
+      .phone.contractbook .cta { background:#fcbf02; color:#1a1a1a; border-radius: 16px; }
+      .phone.contractbook .eyebrow { color:#0541f5; }
+      .phone.contractbook .progress-fill { background:#0541f5; }
+
+      .cursor { position: absolute; left: 970px; top: 455px; z-index: 30; width: 54px; height: 66px; filter: drop-shadow(0 8px 10px rgba(0,0,0,.22)); transform-origin: 8px 8px; }
+      .cursor path { fill: #fff; stroke: #151514; stroke-width: 3; stroke-linejoin: round; }
+
+      .outro-wrap { position:absolute; inset:0; display:grid; grid-template-columns: 1.25fr .75fr; align-items:center; padding: 120px 120px 110px; gap:100px; }
+      .outro-title { font-size: 102px; line-height: .95; letter-spacing: -.055em; font-weight: 850; max-width: 1100px; }
+      .outro-copy { margin-top: 36px; font-size: 27px; line-height: 1.45; color: #565653; max-width: 850px; }
+      .stat-column { display:grid; gap:20px; }
+      .stat { min-height: 150px; border-radius: 30px; padding: 30px 34px; background: rgba(255,255,255,.7); border:1px solid rgba(21,21,20,.12); }
+      .stat strong { font-size: 58px; line-height: 1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+      .stat span { display:block; margin-top:16px; font-size:21px; color:#5f5f5b; }
+      .color-dots { margin-top: 48px; display:flex; gap:16px; }
+      .color-dots i { width:22px; height:22px; border-radius:50%; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="15.5"
+      data-width="1920"
+      data-height="1080"
+    >
+      <section id="scene-intro" class="scene" data-layout-allow-overlap data-layout-allow-overflow>
+        <div class="stage-grid" data-layout-ignore></div><div class="stage-rule top"></div><div class="stage-rule bottom"></div>
+        <div class="orb blue" style="left:-90px;top:-120px" data-layout-ignore></div><div class="orb gold" style="right:280px;bottom:-220px" data-layout-ignore></div>
+        <div class="meta">Max-Контракт <span>интерактивный прототип</span></div><div class="counter">00 / 04</div>
+        <div class="intro-copy"><div class="intro-kicker">Один продукт · три характера</div><h1 class="intro-title">Дизайн, которым можно пользоваться</h1><p class="intro-subtitle">Одинаковый сценарий во всех концепциях. Цвет, типографика и пластика интерфейса - из исходных макетов.</p></div>
+        <div class="theme-stack">
+          <div class="theme-pill"><i style="background:#1f64c8"></i>Jeton<small>спокойный</small></div>
+          <div class="theme-pill"><i style="background:#fc5000"></i>Caldera<small>индустриальный</small></div>
+          <div class="theme-pill"><i style="background:#fcbf02"></i>Contractbook<small>премиальный</small></div>
+        </div>
+      </section>
+
+      <section id="scene-jeton" class="scene" data-layout-allow-overlap data-layout-allow-overflow>
+        <div class="stage-grid" data-layout-ignore></div><div class="stage-rule top"></div><div class="stage-rule bottom"></div><div class="orb blue" style="right:260px;top:140px" data-layout-ignore></div>
+        <div class="meta">Max-Контракт <span>выбор ответа</span></div><div class="counter">01 / 04</div>
+        <div class="demo-layout">
+          <div class="side-copy"><div class="theme-number">01 - Editorial Fintech</div><h2 class="theme-name">Jeton</h2><p class="theme-description">Воздушный светлый холст, глубокий синий и мягкие функциональные карточки.</p><div class="function-card"><b>✓</b> Выбор фиксируется сразу</div></div>
+          <div class="phone jeton">
+            <div class="phone-status"><span>9:41</span><span class="status-icons">▮▮ ◉ ▰</span></div>
+            <div class="phone-body"><div class="app-head"><div><div class="eyebrow">Вопрос 1 из 4</div><div class="head-row"><span class="back">‹</span><h3 class="app-title">Уточним детали</h3></div></div><div class="sparkle">✣</div></div><p class="app-copy">Ответы помогут сделать условия точнее и понятнее обеим сторонам.</p><div class="progress"><div class="progress-fill"></div></div><div class="question"><div class="question-title">Кто оплачивает коммунальные услуги?</div><div class="options"><div class="option selected">Арендатор</div><div class="option">Арендодатель</div><div class="option">Поровну</div></div></div><div class="skip">Пропустить вопрос</div></div>
+            <div class="cta">Следующий вопрос <span>→</span></div><div class="home-indicator"></div>
+          </div>
+          <div class="side-copy right"><div class="theme-number">Общее действие</div><h2 class="theme-name">Точно</h2><p class="theme-description">Пользователь выбирает вариант и продолжает сценарий без скрытых переходов.</p></div>
+        </div>
+        <svg class="cursor" viewBox="0 0 54 66" aria-hidden="true"><path d="M6 5 L46 38 L29 40 L38 59 L27 64 L18 44 L6 56 Z"/></svg>
+      </section>
+
+      <section id="scene-caldera" class="scene" data-layout-allow-overlap data-layout-allow-overflow>
+        <div class="stage-grid" data-layout-ignore></div><div class="stage-rule top"></div><div class="stage-rule bottom"></div><div class="orb orange" style="left:230px;bottom:50px" data-layout-ignore></div>
+        <div class="meta">Max-Контракт <span>тот же сценарий</span></div><div class="counter">02 / 04</div>
+        <div class="demo-layout">
+          <div class="side-copy"><div class="theme-number">02 - Bold Industrial</div><h2 class="theme-name" style="font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.01em">Caldera</h2><p class="theme-description">Сжатая типографика, тёплый минеральный фон и molten-orange для решающих действий.</p><div class="function-card"><b>✓</b> Логика не меняется</div></div>
+          <div class="phone caldera">
+            <div class="phone-status"><span>9:41</span><span class="status-icons">▮▮ ◉ ▰</span></div>
+            <div class="phone-body"><div class="app-head"><div><div class="eyebrow">Вопрос 1 из 4</div><div class="head-row"><span class="back">‹</span><h3 class="app-title">Уточним детали</h3></div></div><div class="sparkle">✣</div></div><p class="app-copy" style="font-family:'Manrope',sans-serif">Ответы помогут сделать условия точнее и понятнее обеим сторонам.</p><div class="progress"><div class="progress-fill"></div></div><div class="question"><div class="question-title">Кто оплачивает коммунальные услуги?</div><div class="options"><div class="option selected">Арендатор</div><div class="option">Арендодатель</div><div class="option">Поровну</div></div></div><div class="skip" style="font-family:'Manrope',sans-serif">Пропустить вопрос</div></div>
+            <div class="cta">Следующий вопрос <span>→</span></div><div class="home-indicator"></div>
+          </div>
+          <div class="side-copy right"><div class="theme-number">Общее действие</div><h2 class="theme-name" style="font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.01em">Ясно</h2><p class="theme-description">Выбранный вариант обозначен оранжевой рамкой, но поведение остаётся тем же.</p></div>
+        </div>
+        <svg class="cursor" viewBox="0 0 54 66" aria-hidden="true"><path d="M6 5 L46 38 L29 40 L38 59 L27 64 L18 44 L6 56 Z"/></svg>
+      </section>
+
+      <section id="scene-contractbook" class="scene" data-layout-allow-overlap data-layout-allow-overflow>
+        <div class="stage-grid" data-layout-ignore></div><div class="stage-rule top"></div><div class="stage-rule bottom"></div><div class="orb gold" style="right:180px;bottom:-90px" data-layout-ignore></div>
+        <div class="meta">Max-Контракт <span>тот же сценарий</span></div><div class="counter">03 / 04</div>
+        <div class="demo-layout">
+          <div class="side-copy"><div class="theme-number">03 - Legal Premium</div><h2 class="theme-name" style="font-family:'Inter',sans-serif">Contractbook</h2><p class="theme-description">Кремовая бумага, редкий ультрамарин и золотой CTA создают спокойную юридическую точность.</p><div class="function-card"><b>✓</b> Функциональный паритет</div></div>
+          <div class="phone contractbook">
+            <div class="phone-status"><span>9:41</span><span class="status-icons">▮▮ ◉ ▰</span></div>
+            <div class="phone-body"><div class="app-head"><div><div class="eyebrow">Вопрос 1 из 4</div><div class="head-row"><span class="back">‹</span><h3 class="app-title">Уточним детали</h3></div></div><div class="sparkle">✣</div></div><p class="app-copy">Ответы помогут сделать условия точнее и понятнее обеим сторонам.</p><div class="progress"><div class="progress-fill"></div></div><div class="question"><div class="question-title">Кто оплачивает коммунальные услуги?</div><div class="options"><div class="option selected">Арендатор</div><div class="option">Арендодатель</div><div class="option">Поровну</div></div></div><div class="skip">Пропустить вопрос</div></div>
+            <div class="cta">Следующий вопрос <span>→</span></div><div class="home-indicator"></div>
+          </div>
+          <div class="side-copy right"><div class="theme-number">Общее действие</div><h2 class="theme-name" style="font-family:'Inter',sans-serif">Спокойно</h2><p class="theme-description">Чипы сокращают визуальный шум, а золото оставляет главный шаг очевидным.</p></div>
+        </div>
+        <svg class="cursor" viewBox="0 0 54 66" aria-hidden="true"><path d="M6 5 L46 38 L29 40 L38 59 L27 64 L18 44 L6 56 Z"/></svg>
+      </section>
+
+      <section id="scene-outro" class="scene" data-layout-allow-overlap data-layout-allow-overflow>
+        <div class="stage-grid" data-layout-ignore></div><div class="stage-rule top"></div><div class="stage-rule bottom"></div><div class="orb blue" style="left:-120px;bottom:-180px" data-layout-ignore></div><div class="orb gold" style="right:-80px;top:-150px" data-layout-ignore></div>
+        <div class="meta">Max-Контракт <span>готово к просмотру</span></div><div class="counter">04 / 04</div>
+        <div class="outro-wrap"><div><div class="intro-kicker">Единая продуктовая логика</div><h2 class="outro-title">Три дизайна. Один уверенный сценарий.</h2><p class="outro-copy">Выборы, переходы, проверки и состояния работают одинаково - меняется только характер интерфейса.</p><div class="color-dots"><i style="background:#1f64c8"></i><i style="background:#fc5000"></i><i style="background:#fcbf02"></i><i style="background:#0541f5"></i></div></div><div class="stat-column"><div class="stat"><strong>43</strong><span>интерактивных экрана</span></div><div class="stat"><strong>3</strong><span>визуальных направления</span></div><div class="stat"><strong>1</strong><span>общая функциональная система</span></div></div></div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+      tl.from("#scene-intro .meta", { opacity: 0, x: -44, duration: .48, ease: "expo.out" }, .18)
+        .from("#scene-intro .counter", { opacity: 0, x: 34, duration: .36, ease: "power2.out" }, .26)
+        .from("#scene-intro .intro-kicker", { opacity: 0, y: 26, duration: .34, ease: "power4.out" }, .3)
+        .from("#scene-intro .intro-title", { opacity: 0, y: 70, scale: .97, duration: .72, ease: "expo.out" }, .42)
+        .from("#scene-intro .intro-subtitle", { opacity: 0, x: -38, duration: .48, ease: "sine.out" }, .78)
+        .from("#scene-intro .theme-pill", { opacity: 0, x: 60, rotation: 1.4, duration: .5, stagger: .1, ease: "back.out(1.15)" }, .62)
+        .from("#scene-intro .stage-rule", { scaleX: 0, duration: .68, stagger: .08, ease: "power2.inOut" }, .2)
+        .from("#scene-intro .orb", { opacity: 0, scale: .72, duration: .9, stagger: .12, ease: "sine.out" }, .22)
+        .to("#scene-intro .orb", { scale: 1.08, duration: 1.25, stagger: .12, ease: "sine.inOut" }, 1.12);
+
+      function enterDemo(scene, start, direction, colors) {
+        tl.from(scene + " .meta", { opacity: 0, x: -42 * direction, duration: .42, ease: "expo.out" }, start + .14)
+          .from(scene + " .counter", { opacity: 0, x: 34 * direction, duration: .32, ease: "power2.out" }, start + .2)
+          .from(scene + " .side-copy:first-of-type", { opacity: 0, x: -74, duration: .58, ease: "power4.out" }, start + .24)
+          .from(scene + " .side-copy.right", { opacity: 0, x: 74, duration: .64, ease: "sine.out" }, start + .32)
+          .from(scene + " .phone", { opacity: 0, y: 74, scale: .91, rotation: -1.2 * direction, duration: .72, ease: "back.out(1.15)" }, start + .24)
+          .from(scene + " .phone-status", { opacity: 0, y: -12, duration: .24, ease: "power2.out" }, start + .62)
+          .from(scene + " .app-head", { opacity: 0, x: -24, duration: .36, ease: "expo.out" }, start + .68)
+          .from(scene + " .app-copy", { opacity: 0, y: 18, duration: .32, ease: "sine.out" }, start + .76)
+          .from(scene + " .progress", { opacity: 0, scaleX: .35, transformOrigin: "left center", duration: .3, ease: "power4.out" }, start + .83)
+          .from(scene + " .question", { opacity: 0, scale: .97, y: 24, duration: .4, ease: "power3.out" }, start + .86)
+          .from(scene + " .question-title", { opacity: 0, x: 22, duration: .34, ease: "circ.out" }, start + .9)
+          .from(scene + " .option", { opacity: 0, y: 22, scale: .98, duration: .28, stagger: .07, ease: "back.out(1.1)" }, start + .97)
+          .from(scene + " .skip", { opacity: 0, x: -18, duration: .26, ease: "power3.out" }, start + 1.18)
+          .from(scene + " .cta", { opacity: 0, y: 30, duration: .34, ease: "expo.out" }, start + 1.12)
+          .from(scene + " .home-indicator", { opacity: 0, scaleX: .4, duration: .24, ease: "power2.out" }, start + 1.26)
+          .from(scene + " .cursor", { opacity: 0, x: -80, y: -50, scale: .72, duration: .42, ease: "back.out(1.3)" }, start + 1.32)
+          .from(scene + " .orb", { opacity: 0, scale: .76, duration: .84, ease: "sine.out" }, start + .28)
+          .to(scene + " .orb", { scale: 1.07, duration: 1.25, ease: "sine.inOut" }, start + 1.08)
+          .to(scene + " .cursor", { scale: .82, duration: .12, ease: "power3.in" }, start + 1.72)
+          .to(scene + " .cursor", { scale: 1, duration: .18, ease: "back.out(1.6)" }, start + 1.84)
+          .fromTo(scene + " .option.selected", { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }, { backgroundColor: colors.selectedBg, color: colors.selectedText, borderColor: colors.selectedBorder, duration: .18, ease: "power3.out" }, start + 1.72)
+          .to(scene + " .option.selected", { scale: 1.025, duration: .16, ease: "power2.out" }, start + 1.76)
+          .to(scene + " .option.selected", { scale: 1, duration: .2, ease: "sine.inOut" }, start + 1.92)
+          .to(scene + " .cursor", { x: 90, y: 430, duration: .62, ease: "power3.inOut" }, start + 2.02)
+          .to(scene + " .cta", { scale: .985, duration: .12, ease: "power3.in" }, start + 2.58)
+          .to(scene + " .cta", { scale: 1, duration: .18, ease: "back.out(1.5)" }, start + 2.7)
+          .to(scene + " .progress-fill", { scaleX: 2, duration: .34, ease: "power3.inOut" }, start + 2.58);
+      }
+
+      tl.to("#scene-intro", { x: -1920, duration: .5, ease: "power3.inOut" }, 2.35)
+        .fromTo("#scene-jeton", { x: 1920, opacity: 1 }, { x: 0, duration: .5, ease: "power3.inOut" }, 2.35);
+      enterDemo("#scene-jeton", 2.35, 1, { surface: "#ffffff", text: "#17243a", border: "#e1e7f0", selectedBg: "#1f64c8", selectedText: "#ffffff", selectedBorder: "#1f64c8" });
+
+      tl.to("#scene-jeton", { x: -1920, duration: .5, ease: "power3.inOut" }, 5.35)
+        .fromTo("#scene-caldera", { x: 1920, opacity: 1 }, { x: 0, duration: .5, ease: "power3.inOut" }, 5.35);
+      enterDemo("#scene-caldera", 5.35, -1, { surface: "#fffdf8", text: "#070607", border: "#c8c7c1", selectedBg: "#fffdf8", selectedText: "#c93f00", selectedBorder: "#fc5000" });
+
+      tl.to("#scene-caldera", { x: -1920, duration: .5, ease: "power3.inOut" }, 8.35)
+        .fromTo("#scene-contractbook", { x: 1920, opacity: 1 }, { x: 0, duration: .5, ease: "power3.inOut" }, 8.35);
+      enterDemo("#scene-contractbook", 8.35, 1, { surface: "#ffffff", text: "#1a1a1a", border: "#e0ded7", selectedBg: "#0541f5", selectedText: "#ffffff", selectedBorder: "#0541f5" });
+
+      tl.to("#scene-contractbook", { x: -1920, duration: .55, ease: "power3.inOut" }, 11.35)
+        .fromTo("#scene-outro", { x: 1920, opacity: 1 }, { x: 0, duration: .55, ease: "power3.inOut" }, 11.35)
+        .from("#scene-outro .meta", { opacity: 0, x: -42, duration: .44, ease: "expo.out" }, 11.58)
+        .from("#scene-outro .counter", { opacity: 0, x: 34, duration: .32, ease: "power2.out" }, 11.64)
+        .from("#scene-outro .intro-kicker", { opacity: 0, y: 22, duration: .32, ease: "power4.out" }, 11.72)
+        .from("#scene-outro .outro-title", { opacity: 0, y: 64, scale: .98, duration: .68, ease: "expo.out" }, 11.84)
+        .from("#scene-outro .outro-copy", { opacity: 0, x: -34, duration: .44, ease: "sine.out" }, 12.18)
+        .from("#scene-outro .stat", { opacity: 0, x: 70, rotation: 1.2, duration: .52, stagger: .12, ease: "back.out(1.15)" }, 11.92)
+        .from("#scene-outro .color-dots i", { opacity: 0, scale: .35, duration: .28, stagger: .08, ease: "back.out(1.8)" }, 12.48)
+        .from("#scene-outro .stage-rule", { scaleX: 0, duration: .62, stagger: .08, ease: "power2.inOut" }, 11.56)
+        .from("#scene-outro .orb", { opacity: 0, scale: .72, duration: .9, stagger: .12, ease: "sine.out" }, 11.62)
+        .to("#scene-outro .orb", { scale: 1.08, duration: 1.5, stagger: .1, ease: "sine.inOut" }, 12.62);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
