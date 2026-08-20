@@ -11,7 +11,7 @@ export function ConceptCard({ concept }: { concept: ConceptDefinition }) {
         <div className="relative aspect-[16/10] overflow-hidden bg-[#e8e8e4]">
           <Image src={concept.preview} alt={`Превью концепции ${concept.name}`} fill sizes="(max-width: 900px) 100vw, 33vw" className="object-cover object-top transition duration-500 group-hover:scale-[1.015]" priority />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
-          <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">Концепция {concept.number}</span>
+          <span className={`absolute left-4 top-4 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-[0_5px_16px_rgba(0,0,0,.16)] backdrop-blur-md ${concept.slug === "contractbook" ? "border-white/70 bg-white/95 text-black" : "border-black/80 bg-black/90 text-white"}`}>Концепция {concept.number}</span>
         </div>
       </Link>
       <div className="p-6">
