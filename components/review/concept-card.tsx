@@ -7,7 +7,7 @@ import type { ConceptDefinition } from "@/lib/types";
 export function ConceptCard({ concept }: { concept: ConceptDefinition }) {
   return (
     <article className="group overflow-hidden rounded-[28px] border border-black/10 bg-white transition duration-300 hover:-translate-y-0.5">
-      <Link href={`/concept/${concept.slug}/prototype?screen=welcome`} className="block">
+      <Link href={`/concept/${concept.slug}/prototype?screen=splash`} className="block">
         <div className="relative aspect-[16/10] overflow-hidden bg-[#e8e8e4]">
           <Image src={concept.preview} alt={`Превью концепции ${concept.name}`} fill sizes="(max-width: 900px) 100vw, 33vw" className="object-cover object-top transition duration-500 group-hover:scale-[1.015]" priority />
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
@@ -20,7 +20,7 @@ export function ConceptCard({ concept }: { concept: ConceptDefinition }) {
         <p className="mt-2 text-xs font-semibold" style={{ color: concept.primary }}>{concept.character}</p>
         <p className="mt-4 min-h-12 text-sm leading-relaxed text-black/55">{concept.summary}</p>
         <div className="mt-6 flex flex-wrap items-center gap-2">
-          <Button asChild className="rounded-full"><Link href={`/concept/${concept.slug}/prototype?screen=welcome`}>Посмотреть дизайн <ArrowUpRight size={14} /></Link></Button>
+          <Button asChild className="rounded-full"><Link href={`/concept/${concept.slug}/prototype?screen=splash`}>Посмотреть дизайн <ArrowUpRight size={14} /></Link></Button>
           <Button variant="ghost" asChild className="rounded-full text-xs"><Link href="/compare?screen=welcome">Сравнить экраны</Link></Button>
         </div>
       </div>
